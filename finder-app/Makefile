@@ -1,19 +1,7 @@
-SRC := writer.c
-TARGET = writer
-OBJS := $(SRC:.c=.o)
-
-CROSS_COMPILE ?= none
-
-ifeq ($(CROSS_COMPILE),aarch64-none-linux-gnu-)
-    CC=aarch64-none-linux-gnu-gcc
-else
-    CC=gcc
-endif
-
-all: $(TARGET)
-
-$(TARGET) : $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) -o $(TARGET) $(LDFLAGS)
-
+CCOMP=gcc
+BUILD_TOOL=
+all: default
+default:
+	$(BUILD_TOOL)$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) -o writer writer.c $(LDFLAGS)
 clean:
-	-rm -f *.o $(TARGET) *.elf *.map
+	@rm -f writer *.o
