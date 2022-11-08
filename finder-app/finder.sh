@@ -1,27 +1,30 @@
 #!/bin/sh
-
-#Accepts the following runtime arguments: the first argument is a path to a directory on the filesystem, referred to below as filesdir; the second argument is a text string which will be searched within these files, referred to below as searchstr
-
 filesdir=$1
 searchstr=$2
+argcount=$#
 
-#Exits with return value 1 error and print statements if any of the parameters above were not specified
-    
-if [ $# != 2 ]
+if [ $argcount -lt 2 ] 
 then
-	echo "Needs two params, for example \'finder.sh /tmp/aesd/assignment1 linux\'"
+	echo "No files dir provided, or search string missing."
+	echo "Usage: finder.sh search_path search_params"
+	exit 1
+elif [ -d $filesdir ]
+then
+	
+	# We have a directory we can search. Now we want to find the total number of files inside.
+	# Use ls to list all files, including the . and .. nodes, then pipe to word cound and get number
+	# of lines read. Each line is one file.
+	# -1 is for one line per file
+	# May also need
+	# -A is for almost all files (not . or ..)
+	# -q to handle \n and other control characters properly. 
+	filescount=$(ls -1A $filesdir | wc -l)
+	
+	# Get matching lines in each file.
+	matchinglines=$(grep -R $searchstr $filesdir | wc -l)
+	
+	echo "The number of files are $filescount and the number of matching lines are $matchinglines"
+else
+	echo "Invalid directory provided. (Maybe you provided a file name instead of a directory?)"
 	exit 1
 fi
-
-#Exits with return value 1 error and print statements if filesdir does not represent a directory on the filesystem
-    
-if [ ! -d $filesdir ]
-then
-	echo "Directory does not exist in file system"
-	exit 1
-fi
-
-#Prints a message "The number of files are X and the number of matching lines are Y" where X is the number of files in the directory and all subdirectories and Y is the number of matching lines found in respective files.
-dirFiles=$( find $filesdir -type f |wc -l )
-matchLines=$( grep -cro $searchstr $filesdir/* | wc -l )
-echo "The number of files are $dirFiles and the number of matching lines are $matchLines"
