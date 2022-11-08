@@ -1,28 +1,37 @@
-#!/bin/sh
+#!/bin/bash
+output_file=$1
+write_string=$2
 
-#Accepts the following arguments: the first argument is a full path to a file (including filename) on the filesystem, referred to below as writefile; the second argument is a text string which will be written within this file, referred to below as writestr
-
-writefile=$1
-writestr=$2
-
-
-#Exits with value 1 error and print statements if any of the arguments above were not specified
-
-if [ $# != 2 ]
+if [ $# -lt 2 ] 
 then
-	echo "Needs two params, for example 'writer.sh /tmp/aesd/assignment1 linux'"
+	echo "Either no file was specified, or no write data was provided."
+	echo "Usage: writer.sh absolute_file_path file_data"
 	exit 1
 fi
 
-
-#Creates a new file with name and path writefile with content writestr, overwriting any existing file and creating the path if it doesn’t exist. Exits with value 1 and error print statement if the file could not be created.
-
-mkdir -p $(dirname $writefile)
-
-echo $writestr > $writefile
-
-if [ ! -f $writefile ]
+# Check if the file exists. If not, we can check for write permissions and create it.
+if [ ! -e $output_file ] 
 then
-	echo "File could not be created"
-	exit 1
+	# See if we can create the file.
+	# Does the directory exist?
+	directory_name=$(dirname "$output_file")
+	if [ ! -d directory_name ]
+	then
+		# Looks like the directory doesn't exist. 
+		# Let's make one
+		dir_creation_status=$(mkdir -p $directory_name)
+		if [ $? -ne 0 ]
+		then
+			# Creating the directory failed.
+			# Exit with an error.
+			echo "Failed to create the directory for the provided file ($directory_name)."
+			exit 1
+		fi
+	fi
+	file_creation_status=$(echo $write_string > $output_file)
+	if [ $? -ne 0 ]
+	then
+		echo "Failed to write to file: $output_file."
+		exit 1
+	fi
 fi
